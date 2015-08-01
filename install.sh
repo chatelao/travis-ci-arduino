@@ -19,49 +19,59 @@ export AUX_PLATFORMS='declare -A aux_platforms=( [trinket]="adafruit:avr:trinket
 sleep 3
 export DISPLAY=:1.0
 
-# download and install arduino 1.6.5
-wget http://downloads.arduino.cc/arduino-1.6.5-linux64.tar.xz
-tar xf arduino-1.6.5-linux64.tar.xz
-mv arduino-1.6.5 $HOME/arduino_ide
+# build all of the examples for the passed platform
+function install_platform()
+{
+  # define arduino package 1.6.5
+  arduino_version=1.6.5
+  arduino_package=arduino-${arduino_version}-linux64.tar.xz  
 
-# move this library to the arduino libraries folder
-ln -s $PWD $HOME/arduino_ide/libraries/Adafruit_Test_Library
+  # download and install arduino
+  wget http://downloads.arduino.cc/${arduino_package}
+  tar xf ${arduino_package}
+  mv arduino-${arduino_version} $HOME/arduino_ide
+  
+  # move this library to the arduino libraries folder
+  ln -s $PWD $HOME/arduino_ide/libraries/Adafruit_Test_Library
+  
+  # add the arduino CLI to our PATH
+  export PATH="$HOME/arduino_ide:$PATH"
 
-# add the arduino CLI to our PATH
-export PATH="$HOME/arduino_ide:$PATH"
+  
+  echo -e "\n########################################################################";
+  echo "INSTALLING DEPENDENCIES"
+  echo "########################################################################";  
+  
+  # install the due, esp8266, and adafruit board packages
+  echo -n "ADD PACKAGE INDEX: "
+  DEPENDENCY_OUTPUT=$(arduino --pref "boardsmanager.additional.urls=https://adafruit.github.io/arduino-board-index/package_adafruit_index.json,http://arduino.esp8266.com/stable/package_esp8266com_index.json" --save-prefs 2>&1)
+  if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
+  
+  echo -n "DUE: "
+  DEPENDENCY_OUTPUT=$(arduino --install-boards arduino:sam 2>&1)
+  if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
+  
+  echo -n "ESP8266: "
+  DEPENDENCY_OUTPUT=$(arduino --install-boards esp8266:esp8266 2>&1)
+  if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
+  
+  echo -n "ADAFRUIT AVR: "
+  DEPENDENCY_OUTPUT=$(arduino --install-boards adafruit:avr 2>&1)
+  if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
+  
+  # install random lib so the arduino IDE grabs a new library index
+  # see: https://github.com/arduino/Arduino/issues/3535
+  echo -n "UPDATE LIBRARY INDEX: "
+  DEPENDENCY_OUTPUT=$(arduino --install-library USBHost > /dev/null 2>&1)
+  if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
+  
+  # set the maximal compiler warning level
+  echo -n "SET BUILD PREFERENCES: "
+  DEPENDENCY_OUTPUT=$(arduino --pref "compiler.warning_level=all" --save-prefs 2>&1)
+  if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
+}
 
-echo -e "\n########################################################################";
-echo "INSTALLING DEPENDENCIES"
-echo "########################################################################";
-
-
-# install the due, esp8266, and adafruit board packages
-echo -n "ADD PACKAGE INDEX: "
-DEPENDENCY_OUTPUT=$(arduino --pref "boardsmanager.additional.urls=https://adafruit.github.io/arduino-board-index/package_adafruit_index.json,http://arduino.esp8266.com/stable/package_esp8266com_index.json" --save-prefs 2>&1)
-if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
-
-echo -n "DUE: "
-DEPENDENCY_OUTPUT=$(arduino --install-boards arduino:sam 2>&1)
-if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
-
-echo -n "ESP8266: "
-DEPENDENCY_OUTPUT=$(arduino --install-boards esp8266:esp8266 2>&1)
-if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
-
-echo -n "ADAFRUIT AVR: "
-DEPENDENCY_OUTPUT=$(arduino --install-boards adafruit:avr 2>&1)
-if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
-
-# install random lib so the arduino IDE grabs a new library index
-# see: https://github.com/arduino/Arduino/issues/3535
-echo -n "UPDATE LIBRARY INDEX: "
-DEPENDENCY_OUTPUT=$(arduino --install-library USBHost > /dev/null 2>&1)
-if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
-
-# set the maximal compiler warning level
-echo -n "SET BUILD PREFERENCES: "
-DEPENDENCY_OUTPUT=$(arduino --pref "compiler.warning_level=all" --save-prefs 2>&1)
-if [ $? -ne 0 ]; then echo -e "\xe2\x9c\x96"; else echo -e "\xe2\x9c\x93"; fi
+install_platform
 
 # init the json temp var for the current platform
 export PLATFORM_JSON=""
