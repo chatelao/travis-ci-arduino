@@ -42,7 +42,7 @@ function install_platform()
 
   # Dump current filesystem structure
   find .
-  find $HOME/.arduino
+  find $HOME/.arduino15
   arduino --get-pref
 
   # move this library to the arduino libraries folder
