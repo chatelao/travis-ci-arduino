@@ -42,6 +42,10 @@ function install_platform()
 
   # Dump current filesystem structure
   find .
+  pushd
+  cd $HOME
+  find .
+  popd
   
   # move this library to the arduino libraries folder
   ln -fs $PWD $HOME/arduino_ide/libraries/Adafruit_Test_Library
