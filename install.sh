@@ -29,13 +29,13 @@ function install_platform()
 
   # define arduino package 1.6.5
   local arduino_version=1.6.5
-  local arduino_package=arduino-${arduino_version}-linux64.tar.xz  
-
   # expects argument 1 to be the platform key
   if [ $# -gt 0 ]
     then
       local arduino_version=$1
   fi
+
+  local arduino_package=arduino-${arduino_version}-linux64.tar.xz  
 
   # download and install arduino
   wget http://downloads.arduino.cc/${arduino_package}
