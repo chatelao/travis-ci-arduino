@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -x
+
 # we need bash 4 for associative arrays
 if [ "${BASH_VERSION%%[^0-9]*}" -lt "4" ]; then
   echo "BASH VERSION < 4: ${BASH_VERSION}" >&2
@@ -22,9 +24,18 @@ export DISPLAY=:1.0
 # build all of the examples for the passed platform
 function install_platform()
 {
+  # remove old installations
+  rm -rf $HOME/arduino_ide
+
   # define arduino package 1.6.5
-  arduino_version=1.6.5
-  arduino_package=arduino-${arduino_version}-linux64.tar.xz  
+  local arduino_version=1.6.5
+  local arduino_package=arduino-${arduino_version}-linux64.tar.xz  
+
+  # expects argument 1 to be the platform key
+  if [ $# -gt 0 ]
+    then
+      local arduino_version=$1
+  fi
 
   # download and install arduino
   wget http://downloads.arduino.cc/${arduino_package}
