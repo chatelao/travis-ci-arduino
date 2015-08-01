@@ -39,6 +39,9 @@ function install_platform()
   wget http://downloads.arduino.cc/${arduino_package}
   tar xf ${arduino_package}
   mv arduino-${arduino_version} $HOME/arduino_ide
+
+  # Dump current filesystem structure
+  find .
   
   # move this library to the arduino libraries folder
   ln -fs $PWD $HOME/arduino_ide/libraries/Adafruit_Test_Library
