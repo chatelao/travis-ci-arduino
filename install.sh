@@ -43,7 +43,7 @@ function install_platform()
   # Dump current filesystem structure
   find .
   pushd
-  cd $HOME
+  cd $HOME/.arduino
   find .
   popd
   
